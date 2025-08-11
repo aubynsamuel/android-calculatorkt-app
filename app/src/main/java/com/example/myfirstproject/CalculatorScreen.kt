@@ -6,11 +6,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -23,6 +22,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,7 +43,7 @@ fun CalculatorScreen() {
         "7", "8", "9", "*",
         "4", "5", "6", "-",
         "1", "2", "3", "+",
-        "", "0", ".", "="
+        "00", "0", ".", "="
     )
 
     Scaffold(
@@ -95,11 +95,11 @@ fun CalculatorScreen() {
 
             IconButton(
                 modifier = Modifier.align(Alignment.End),
-                onClick = { viewModel.onAction(CalculatorAction.Delete) }
+                onClick = { viewModel.onButtonClick("DELETE") }
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+                    painter = painterResource(R.drawable.outline_backspace_24),
+                    contentDescription = "Backspace", modifier = Modifier.size(30.dp)
                 )
             }
             HorizontalDivider()
@@ -130,29 +130,8 @@ fun CalculatorScreen() {
                     CalculatorButton(
                         text = buttonValue,
                         onClick = {
-                            when (buttonValue) {
-                                "C" -> viewModel.onAction(CalculatorAction.Clear)
-                                "=" -> viewModel.onAction(CalculatorAction.Calculate)
-                                "." -> viewModel.onAction(CalculatorAction.Decimal)
-                                in "0".."9" -> viewModel.onAction(
-                                    CalculatorAction.Number(
-                                        buttonValue.toInt()
-                                    )
-                                )
-
-                                in "+-*/()" -> viewModel.onAction(
-                                    CalculatorAction.Operation(
-                                        when (buttonValue) {
-                                            "+" -> CalculatorOperation.Add
-                                            "-" -> CalculatorOperation.Subtract
-                                            "*" -> CalculatorOperation.Multiply
-                                            "/" -> CalculatorOperation.Divide
-                                            "(" -> CalculatorOperation.Parentheses("(")
-                                            ")" -> CalculatorOperation.Parentheses(")")
-                                            else -> return@CalculatorButton
-                                        }
-                                    )
-                                )
+                            if (buttonValue.isNotEmpty()) {
+                                viewModel.onButtonClick(buttonValue)
                             }
                         },
                         backgroundColor = backgroundColor,

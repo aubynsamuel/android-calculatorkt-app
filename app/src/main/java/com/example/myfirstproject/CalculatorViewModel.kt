@@ -10,23 +10,6 @@ data class CalculatorState(
     val display: String = "0",
 )
 
-sealed class CalculatorAction {
-    data class Number(val number: Int) : CalculatorAction()
-    object Clear : CalculatorAction()
-    object Delete : CalculatorAction()
-    object Decimal : CalculatorAction()
-    object Calculate : CalculatorAction()
-    data class Operation(val operation: CalculatorOperation) : CalculatorAction()
-}
-
-sealed class CalculatorOperation(val symbol: String) {
-    object Add : CalculatorOperation("+")
-    object Subtract : CalculatorOperation("-")
-    object Multiply : CalculatorOperation("*")
-    object Divide : CalculatorOperation("/")
-    data class Parentheses(val value: String) : CalculatorOperation(value)
-}
-
 class CalculatorViewModel : ViewModel() {
 
     var state by mutableStateOf(CalculatorState())
@@ -35,20 +18,29 @@ class CalculatorViewModel : ViewModel() {
         private set
     var stateParts by mutableStateOf(emptyList<String>())
 
-    fun onAction(action: CalculatorAction) {
-        when (action) {
-            is CalculatorAction.Number -> enterNumber(action.number.toString())
-            is CalculatorAction.Clear -> state = CalculatorState()
-            is CalculatorAction.Delete -> delete()
-            is CalculatorAction.Decimal -> enterDecimal()
-            is CalculatorAction.Calculate -> calculate()
-            is CalculatorAction.Operation -> enterOperation(action.operation.symbol)
+    fun onButtonClick(buttonValue: String) {
+        when (buttonValue) {
+            "C" -> clear()
+            "=" -> calculate()
+            "." -> enterDecimal()
+            "DELETE" -> delete() // Special case for delete button
+            in "0".."9" -> enterNumber(buttonValue)
+            in "+-*/()" -> enterOperation(buttonValue)
         }
         checkPreCalculation()
     }
 
+    private fun clear() {
+        state = CalculatorState()
+        preCalcValue = CalculatorState(display = "")
+    }
+
     private fun enterOperation(symbol: String) {
-        state = if (state.display == "0") {
+        state = if (state.display.last() in "+-*/()") {
+            state.copy(
+                display = state.display.dropLast(1) + symbol
+            )
+        } else if (state.display == "0") {
             state.copy(display = symbol)
         } else {
             state.copy(display = state.display + symbol)
@@ -72,7 +64,7 @@ class CalculatorViewModel : ViewModel() {
         }
     }
 
-    fun checkPreCalculation() {
+    private fun checkPreCalculation() {
         val operators = listOf("+", "-", "*", "/", "(", ")")
         val parts = state.display.split(*operators.toTypedArray())
         stateParts = parts
@@ -84,7 +76,6 @@ class CalculatorViewModel : ViewModel() {
                 display = ""
             )
         }
-
     }
 
     private fun preCalculate() {

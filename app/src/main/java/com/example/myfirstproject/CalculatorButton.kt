@@ -46,7 +46,7 @@ fun CalculatorButton(
         Text(
             text = text,
             fontSize = 25.sp,
-            fontWeight = FontWeight.Light,
+            fontWeight = FontWeight.W400,
             modifier = Modifier.wrapContentSize(Alignment.Center)
         )
     }
