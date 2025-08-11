@@ -19,7 +19,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myfirstproject.ui.theme.ScientificCalculatorTheme
 
@@ -36,6 +36,7 @@ import com.example.myfirstproject.ui.theme.ScientificCalculatorTheme
 fun CalculatorScreen() {
     val viewModel: CalculatorViewModel = viewModel()
     val state = viewModel.state
+    val preCalcValue = viewModel.preCalcValue
 
     val buttons = listOf(
         "C", "(", ")", "/",
@@ -69,14 +70,26 @@ fun CalculatorScreen() {
                 modifier = Modifier
                     .fillMaxHeight(0.25f),
             ) {
-                TextField(
-                    value = state.display,
-                    onValueChange = { },
-                    modifier = Modifier.fillMaxSize(),
-                    readOnly = true,
-                    textStyle = MaterialTheme.typography.displayLarge.copy(
+                Text(
+                    text = state.display,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .weight(1f),
+                    style = MaterialTheme.typography.displayMedium.copy(
                         textAlign = TextAlign.End
                     ),
+                    maxLines = 2
+                )
+
+                Text(
+                    preCalcValue.display,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(15.dp)
+                        .padding(end = 15.dp),
+                    fontSize = 18.sp, maxLines = 1
                 )
             }
 
@@ -99,15 +112,15 @@ fun CalculatorScreen() {
                     .weight(1f),
                 verticalArrangement = Arrangement.Center,
             ) {
-                items(buttons) { button ->
-                    val backgroundColor = when (button) {
+                items(buttons) { buttonValue ->
+                    val backgroundColor = when (buttonValue) {
                         "C" -> MaterialTheme.colorScheme.error
                         "=" -> MaterialTheme.colorScheme.primary
                         in "+-*/()" -> MaterialTheme.colorScheme.primary
                         else -> MaterialTheme.colorScheme.secondary
                     }
 
-                    val textColor = when (button) {
+                    val textColor = when (buttonValue) {
                         "C" -> MaterialTheme.colorScheme.onError
                         "=" -> MaterialTheme.colorScheme.onPrimary
                         in "+-*/()" -> MaterialTheme.colorScheme.onPrimary
@@ -115,23 +128,28 @@ fun CalculatorScreen() {
                     }
 
                     CalculatorButton(
-                        text = button,
+                        text = buttonValue,
                         onClick = {
-                            when (button) {
+                            when (buttonValue) {
                                 "C" -> viewModel.onAction(CalculatorAction.Clear)
                                 "=" -> viewModel.onAction(CalculatorAction.Calculate)
                                 "." -> viewModel.onAction(CalculatorAction.Decimal)
-                                in "0".."9" -> viewModel.onAction(CalculatorAction.Number(button.toInt()))
+                                in "0".."9" -> viewModel.onAction(
+                                    CalculatorAction.Number(
+                                        buttonValue.toInt()
+                                    )
+                                )
+
                                 in "+-*/()" -> viewModel.onAction(
                                     CalculatorAction.Operation(
-                                        when (button) {
+                                        when (buttonValue) {
                                             "+" -> CalculatorOperation.Add
                                             "-" -> CalculatorOperation.Subtract
                                             "*" -> CalculatorOperation.Multiply
                                             "/" -> CalculatorOperation.Divide
                                             "(" -> CalculatorOperation.Parentheses("(")
                                             ")" -> CalculatorOperation.Parentheses(")")
-                                            else -> throw IllegalArgumentException("Invalid operator")
+                                            else -> return@CalculatorButton
                                         }
                                     )
                                 )

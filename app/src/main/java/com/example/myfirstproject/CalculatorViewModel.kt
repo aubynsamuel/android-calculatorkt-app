@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import net.objecthunter.exp4j.ExpressionBuilder
 
 data class CalculatorState(
-    val display: String = "0"
+    val display: String = "0",
 )
 
 sealed class CalculatorAction {
@@ -31,6 +31,9 @@ class CalculatorViewModel : ViewModel() {
 
     var state by mutableStateOf(CalculatorState())
         private set
+    var preCalcValue by mutableStateOf(CalculatorState(display = ""))
+        private set
+    var stateParts by mutableStateOf(emptyList<String>())
 
     fun onAction(action: CalculatorAction) {
         when (action) {
@@ -41,6 +44,7 @@ class CalculatorViewModel : ViewModel() {
             is CalculatorAction.Calculate -> calculate()
             is CalculatorAction.Operation -> enterOperation(action.operation.symbol)
         }
+        checkPreCalculation()
     }
 
     private fun enterOperation(symbol: String) {
@@ -55,11 +59,47 @@ class CalculatorViewModel : ViewModel() {
         try {
             val result = ExpressionBuilder(state.display).build().evaluate()
             state = state.copy(
-                display = result.toString()
+                display = if (result.toString().endsWith(".0")) {
+                    result.toInt().toString() // Convert to Int if no decimal part
+                } else {
+                    result.toString() // Keep as String if it has a decimal part
+                }
             )
         } catch (_: Exception) {
             state = state.copy(
                 display = "Error"
+            )
+        }
+    }
+
+    fun checkPreCalculation() {
+        val operators = listOf("+", "-", "*", "/", "(", ")")
+        val parts = state.display.split(*operators.toTypedArray())
+        stateParts = parts
+
+        if (parts.count() >= 2 && parts.last().isNotBlank()) {
+            preCalculate()
+        } else {
+            preCalcValue = preCalcValue.copy(
+                display = ""
+            )
+        }
+
+    }
+
+    private fun preCalculate() {
+        try {
+            val result = ExpressionBuilder(state.display).build().evaluate()
+            preCalcValue = preCalcValue.copy(
+                display = if (result.toString().endsWith(".0")) {
+                    result.toInt().toString() // Convert to Int if no decimal part
+                } else {
+                    result.toString() // Keep as String if it has a decimal part
+                }
+            )
+        } catch (_: Exception) {
+            preCalcValue = preCalcValue.copy(
+                display = ""
             )
         }
     }
@@ -75,11 +115,10 @@ class CalculatorViewModel : ViewModel() {
     }
 
     private fun enterDecimal() {
-        if (!state.display.contains(".")) {
+        if (!stateParts.last().contains("."))
             state = state.copy(
                 display = state.display + "."
             )
-        }
     }
 
     private fun enterNumber(number: String) {
