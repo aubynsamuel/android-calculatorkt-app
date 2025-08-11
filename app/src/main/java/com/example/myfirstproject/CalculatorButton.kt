@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,15 +25,16 @@ fun CalculatorButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.primary,
-    textColor: Color = MaterialTheme.colorScheme.onPrimary
+    textColor: Color = MaterialTheme.colorScheme.onPrimary,
 ) {
-//    TooltipBox(
-//        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-//        tooltip = { PlainTooltip { Text(text) } },
-//        state = rememberTooltipState()
-//    ) {
+    val haptic = LocalHapticFeedback.current
     Button(
-        onClick = onClick,
+        onClick = {
+            onClick()
+            haptic.performHapticFeedback(
+                hapticFeedbackType = HapticFeedbackType.LongPress
+            )
+        },
         modifier = modifier
             .padding(2.dp)
             .aspectRatio(1f),
@@ -48,4 +51,3 @@ fun CalculatorButton(
         )
     }
 }
-//}
