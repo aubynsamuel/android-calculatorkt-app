@@ -1,5 +1,3 @@
-
-```markdown
 # 📱 Android Calculator App
 
 A simple calculator Android app built using Kotlin in Android Studio.  
@@ -19,7 +17,10 @@ Handles basic arithmetic operations and demonstrates clean architecture.
 
 ## 📸 Screenshots
 
-> *(Add screenshots later if you like — it impresses recruiters)*
+<div align="center">
+   <img src="./screenshots/screenshot1.jpg" alt="Screenshot 1" width="200" style="margin: 20px;">
+   <img src="./screenshots/screenshot2.jpg" alt="Screenshot 2" width="200" style="margin: 20px;">
+</div>
 
 ## 🛠️ Installation
 
@@ -35,4 +36,3 @@ Pull requests are welcome! Fork the repo and make magic happen.
 ## 📄 License
 
 This project is open source. Free to use, modify, or improve.
-```
